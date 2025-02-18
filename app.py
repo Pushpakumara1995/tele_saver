@@ -4,10 +4,10 @@ from telethon import TelegramClient
 app = Flask(__name__)
 
 # Replace with your own Telegram API ID, API hash, and phone number
-API_ID = 'YOUR_API_ID'
-API_HASH = 'YOUR_API_HASH'
-PHONE_NUMBER = 'YOUR_PHONE_NUMBER'
-TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'
+API_ID = '23973795'
+API_HASH = '207f959c0d1219d40543dfc388de63e0'
+PHONE_NUMBER = '+94768515072'
+TELEGRAM_CHAT_ID = '5210630997'
 
 client = TelegramClient('session_name', API_ID, API_HASH)
 
