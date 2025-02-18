@@ -1,31 +1,50 @@
 from flask import Flask, request, jsonify
-from telethon import TelegramClient
+from telethon import TelegramClient, sync
+import requests
 
 app = Flask(__name__)
 
 # Replace with your own Telegram API ID, API hash, and phone number
-API_ID = '23973795'
-API_HASH = '207f959c0d1219d40543dfc388de63e0'
-PHONE_NUMBER = '+94768515072'
-TELEGRAM_CHAT_ID = '5210630997'
+API_ID = 'YOUR_API_ID'
+API_HASH = 'YOUR_API_HASH'
+PHONE_NUMBER = 'YOUR_PHONE_NUMBER'
+TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID'
 
 client = TelegramClient('session_name', API_ID, API_HASH)
+client.start(phone=PHONE_NUMBER)
 
 @app.route('/')
 def index():
-    return "Hello, this is a Telegram message sender!"
+    return "Welcome to the Random Joke Generator!"
+
+@app.route('/random_joke', methods=['GET'])
+def random_joke():
+    JOKE_API_URL = 'https://v2.jokeapi.dev/joke/Any'
+    try:
+        response = requests.get(JOKE_API_URL)
+        response.raise_for_status()
+        joke_data = response.json()
+
+        if joke_data['type'] == 'single':
+            joke = joke_data['joke']
+        else:
+            joke = f"{joke_data['setup']} - {joke_data['delivery']}"
+
+        return jsonify({'joke': joke}), 200
+    except requests.RequestException as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/send_message', methods=['POST'])
-async def send_message():
+def send_message():
     data = request.json
     message = data.get('message')
-    
+
     if not message:
         return jsonify({'error': 'No message provided'}), 400
-    
+
     try:
-        await client.start(phone=PHONE_NUMBER)
-        await client.send_message(TELEGRAM_CHAT_ID, message)
+        with client:
+            client.loop.run_until_complete(client.send_message(TELEGRAM_CHAT_ID, message))
         return jsonify({'status': 'Message sent successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
